@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Brikl_Studio::css/custom_studio_page.css" />
+        <title>Custom Design</title>
+    </head>
+    <body>
+        <referenceBlock name="page.main.title" remove="true" />
+        <referenceContainer name="content">
+            <block class="Brikl\Studio\Block\CustomDesign" name="brikl_customdesign" template="Brikl_Studio::html/brikl_studio.phtml" />
+        </referenceContainer>
+    </body>
+</page>

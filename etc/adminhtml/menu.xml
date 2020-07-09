@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Brikl_Studio::brikl_settings" title="BRIKL" translate="title" module="Brikl_Studio" sortOrder="9" parent="Magento_Backend::system_other_settings" dependsOnModule="Brikl_Studio" action="brikl/settings" resource="Magento_Backend::viewed"/>
+    </menu>
+</config>

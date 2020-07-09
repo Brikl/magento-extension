@@ -1,0 +1,97 @@
+<?php
+
+if (!method_exists(get_class($block), "getProductData")) {
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $store = $objectManager->get('Magento\Framework\Locale\Resolver');
+
+    $lang = substr($store->getLocale(), 0, 2);
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+    $collection = $objectManager->create(\Brikl\Studio\Model\ResourceModel\Studio\Collection::class);
+        
+    $product = $block->getProduct();
+    $productId = $product->getId();
+
+    $briklProductId = null;
+    $shopId = null;
+    $salesChannelId = null;
+    $studioRoute = 'custom-design';
+
+    $collection->addFilter('product_id', $productId);
+    $items = $collection->getItems();
+
+    foreach ($items as $item) {
+        $dataItem = $item->getData();
+        $briklProductId = $dataItem['brikl_product_id'];
+    }
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+    $collection = $objectManager->create(\Brikl\Studio\Model\ResourceModel\Settings\Collection::class);
+
+    $threeDOnly = null;
+
+    $items = $collection->getItems();
+
+    foreach ($items as $item) {
+        $dataItem = $item->getData();
+        switch ($dataItem['key']) {
+            case 'shop_id':
+                $shopId = $dataItem['value'];
+                break;
+            case 'saleschannel_id':
+                $salesChannelId = $dataItem['value'];
+                break;
+            case 'studio_route':
+                $studioRoute = (trim($dataItem['value']) !== "")? $dataItem['value'] : $studioRoute;
+                break;
+        }
+    }
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $redirect = $objectManager->get('\Magento\Framework\App\Response\Http');
+
+    if ($briklProductId && $shopId) {
+        $redirect->setRedirect('/' . $lang . '/' . $studioRoute . '?mp=' . $productId);
+    }
+} else {
+
+    //list($briklProductId, $shopId, $salesChannelId, $pd) = $block->getProductData();
+    extract($block->getProductData()); // $briklProductId, $shopId, $salesChannelId, $pd, $mp
+
+    $cartUrl = $block->getUrl('checkout/cart', ['_secure' => true]); ?>
+    <?php if ($briklProductId && $shopId): ?>
+        <?php
+        ?>
+    <div style="clear:both">        
+        <div class="brikl-studio">                
+        <iframe src="<?php
+        if (empty($embedHostURI)) {
+            echo "https://embed.brikl.com";
+        } else {
+            echo $embedHostURI;
+        } ?>/?mp=<?php echo $mp ?>&s=<?php echo $shopId ?>&sc=<?php echo $salesChannelId ?>&p=<?php echo $briklProductId ?>&c=<?php echo $c ?>&l=<?php echo $lang ?><?php if ($pd) {
+            echo "&pd=" . $pd;
+        } ?>" width="100%" height="100%" frameborder="no" scrolling="no"></iframe>
+        </div>
+        <div class="brikl-dummy"></div>        
+        <script>
+            window.addEventListener('message',function(message){
+                if(message&&message.data&&message.data.type==="brikl.addtocart"){
+                    <?php if ($cartUrl && $redirectOnAddToCart==1) {
+                        echo "window.location.href='" .$cartUrl."';";
+                    } ?>                    
+                }
+            });
+        </script>
+    </div>
+
+        <?php
+else:
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $redirect = $objectManager->get('\Magento\Framework\App\Response\Http');
+        $redirect->setRedirect('/404/landing');
+    endif; ?>
+    <?php
+} ?>
